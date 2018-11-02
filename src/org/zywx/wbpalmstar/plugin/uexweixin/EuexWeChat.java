@@ -1154,7 +1154,6 @@ public class EuexWeChat extends EUExBase {
                 mBrwView.getCurrentWidget().m_widgetPath,
                 mBrwView.getCurrentWidget().m_wgtType);
         final WXImageObject imgObj = createImageObject(imgPath);
-
 		String thumbPath = BUtility.makeRealPath(
 				BUtility.makeUrl(mBrwView.getCurrentUrl(), thumbImgPath),
 				mBrwView.getCurrentWidget().m_widgetPath,
@@ -1404,13 +1403,38 @@ public class EuexWeChat extends EUExBase {
 
 	private WXImageObject createImageObject(String imgPath) {
 		WXImageObject imgObj = new WXImageObject();
+		Bitmap bmp = null;
 		if (imgPath.startsWith("http://")||imgPath.startsWith("https://")) {
-			imgObj.imagePath = imgPath;
+			try {
+				bmp = BitmapFactory.decodeStream(new URL(imgPath)
+						.openStream());
+				imgObj.imageData = Utils.bmpToByteArray(bmp, true);
+			} catch (Exception e) {
+				Toast.makeText(mContext, "错误：" + e.getMessage(),
+						Toast.LENGTH_SHORT).show();
+				e.printStackTrace();
+			}
 		} else {
-			if (imgPath.startsWith("/")) {
-				imgObj.imagePath = imgPath;
+			if (imgPath.startsWith("/")) {// sd卡路径时
+				File f = new File(imgPath);
+				if (!f.exists()) {
+					Toast.makeText(mContext, "File is not exist!",
+							Toast.LENGTH_SHORT).show();
+				}
+
+//				try {
+//					FileInputStream fileInputStream= new FileInputStream(imgPath);
+//					bmp = BitmapFactory.decodeStream(fileInputStream);
+//					imgObj.imageData = Utils.bmpToByteArray(bmp, true);
+//				} catch (FileNotFoundException e) {
+//					e.printStackTrace();
+//				}
+				imgObj.imageData = Utils.bmpToByteArray(bmp, true);
+//                bmp = BitmapFactory.decodeFile(url);
+
 			} else {
 				try {
+//					bmp = BitmapFactory.decodeStream(mContext.getAssets().open(imgPath));
 					InputStream in = mContext.getAssets().open(imgPath);
 					int lenght = in.available();
 					BitmapFactory.Options opts = null;
@@ -1422,7 +1446,7 @@ public class EuexWeChat extends EUExBase {
 					} else {
 						opts.inSampleSize = 1;
 					}
-					Bitmap bmp = BitmapFactory.decodeStream(mContext
+					 bmp = BitmapFactory.decodeStream(mContext
 							.getAssets().open(imgPath));
 					imgObj.imageData = Utils.bmpToByteArray(bmp, true);
 				} catch (Exception e) {

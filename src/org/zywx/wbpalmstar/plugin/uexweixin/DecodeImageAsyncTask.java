@@ -9,6 +9,8 @@ import android.widget.Toast;
 import org.zywx.wbpalmstar.plugin.uexweixin.utils.IFeedback;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 
@@ -38,12 +40,20 @@ public class DecodeImageAsyncTask extends AsyncTask<String, Void, Bitmap> {
             }
         } else {
             if (url.startsWith("/")) {// sd卡路径时
-                File f = new File(url);
-                if (!f.exists()) {
+                    File f = new File(url);
+                    if (!f.exists()) {
                     Toast.makeText(mContext, "File is not exist!",
                             Toast.LENGTH_SHORT).show();
+
                 }
-                bmp = BitmapFactory.decodeFile(url);
+                try {
+                   FileInputStream fileInputStream= new FileInputStream(url);
+                    bmp = BitmapFactory.decodeStream(fileInputStream);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+//                bmp = BitmapFactory.decodeFile(url);
+
             } else {
                 try {
 
